@@ -19,7 +19,12 @@
 #define __WRD_RGB_LED_H__
 
 #include "mbed-drivers/mbed.h"
+
+#if YOTTA_CFG_HARDWARE_WEARABLE_REFERENCE_DESIGN_RGB_LED_PRESENT
 #include "wrd-rgb-led/RGBLEDImplementation.h"
+#else
+#include "wrd-rgb-led/RGBLEDNotPresent.h"
+#endif
 
 #include <queue>
 #include <limits.h>
@@ -122,7 +127,11 @@ private:
     minar::callback_handle_t processQueueHandle;
     std::queue<transaction_t> sendQueue;
 
+#if YOTTA_CFG_HARDWARE_WEARABLE_REFERENCE_DESIGN_RGB_LED_PRESENT
     RGBLEDImplementation led;
+#else
+    RGBLEDNotPresent led;
+#endif
 };
 
 #endif // __WRD_RGB_LED_H__

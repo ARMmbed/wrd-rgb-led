@@ -15,7 +15,7 @@
   },
   "targetDependencies": {
     "onsemi-ncp5623c": {
-      "wrd-rgb-led-onsemi-ncp5623c": "^1.0.0"
+      "wrd-rgb-led-onsemi-ncp5623c": "^2.0.0"
     }
   }
 }

@@ -21,7 +21,7 @@
 
 RGBLED rgb;
 
-#define DELAY 10
+#define DELAY 2
 
 void rotate()
 {

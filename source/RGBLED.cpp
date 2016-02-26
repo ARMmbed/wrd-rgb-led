@@ -79,6 +79,7 @@ void RGBLED::addQueue(uint8_t red, uint8_t green, uint8_t blue, uint32_t duratio
     if (processQueueHandle == NULL)
     {
         processQueueHandle = minar::Scheduler::postCallback(this, &RGBLED::processQueue)
+                                .tolerance(1)
                                 .getHandle();
     }
 }

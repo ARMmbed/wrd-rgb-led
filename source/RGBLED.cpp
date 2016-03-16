@@ -47,24 +47,36 @@ RGBLED::LEDAdder::LEDAdder(const LEDAdder& adder)
     *this = adder;
 }
 
-RGBLED::LEDAdder& RGBLED::LEDAdder::set(uint8_t red, uint8_t green, uint8_t blue, uint32_t duration)
+RGBLED::LEDAdder& RGBLED::LEDAdder::set(uint8_t red,
+                                        uint8_t green,
+                                        uint8_t blue,
+                                        uint32_t duration,
+                                        FunctionPointer0<void> callback)
 {
     /* queue action using non-fluent API */
-    owner->addQueue(red, green, blue, duration);
+    owner->addQueue(red, green, blue, duration, callback);
 
     return *this;
 }
 
-RGBLED::LEDAdder RGBLED::set(uint8_t red, uint8_t green, uint8_t blue, uint32_t duration)
+RGBLED::LEDAdder RGBLED::set(uint8_t red,
+                             uint8_t green,
+                             uint8_t blue,
+                             uint32_t duration,
+                             FunctionPointer0<void> callback)
 {
     RGBLED::LEDAdder adder(this);
 
-    addQueue(red, green, blue, duration);
+    addQueue(red, green, blue, duration, callback);
 
     return adder;
 }
 
-void RGBLED::addQueue(uint8_t red, uint8_t green, uint8_t blue, uint32_t duration)
+void RGBLED::addQueue(uint8_t red,
+                      uint8_t green,
+                      uint8_t blue,
+                      uint32_t duration,
+                      FunctionPointer0<void> callback)
 {
     /* add command to queue */
     RGBLED::transaction_t action;
@@ -72,6 +84,7 @@ void RGBLED::addQueue(uint8_t red, uint8_t green, uint8_t blue, uint32_t duratio
     action.green = green;
     action.blue = blue;
     action.duration = duration;
+    action.callback = callback;
 
     sendQueue.push(action);
 
@@ -89,6 +102,9 @@ void RGBLED::processQueue(void)
     /* clear task handle */
     processQueueHandle = NULL;
 
+    /* store callback for when action is complete */
+    FunctionPointer0<void> currentAction;
+
     // only process if queue is not empty
     if (sendQueue.size() > 0)
     {
@@ -98,6 +114,9 @@ void RGBLED::processQueue(void)
         /* use RGB LED implementation to set colors */
         FunctionPointer0<void> fp(this, &RGBLED::setDone);
         led.set(action.red, action.green, action.blue, fp);
+
+        /* store callback for current action */
+        currentAction = action.callback;
     }
     else
     {
@@ -105,6 +124,12 @@ void RGBLED::processQueue(void)
         FunctionPointer0<void> fp(this, &RGBLED::setDone);
         led.set(0, 0, 0);
     }
+
+    if (previousAction)
+    {
+        minar::Scheduler::postCallback(previousAction);
+    }
+    previousAction = currentAction;
 }
 
 void RGBLED::setDone(void)

@@ -20,7 +20,7 @@
 
 #include "mbed-drivers/mbed.h"
 
-#if YOTTA_CFG_HARDWARE_WEARABLE_REFERENCE_DESIGN_RGB_LED_PRESENT
+#if YOTTA_CFG_HARDWARE_WRD_RGB_LED_PRESENT
 #include "wrd-rgb-led/RGBLEDImplementation.h"
 #else
 #include "wrd-rgb-led/RGBLEDNotPresent.h"
@@ -57,9 +57,14 @@ public:
          * @param blue The blue color intensity in [0;255]
          * @param duration The time in milliseconds the LED is on.
          *                 Setting this to ULONG_MAX means forever.
+         * @param callback Function to be called when command is replaced.
          * @return LEDAdder reference for a fluent API.
          */
-        LEDAdder& set(uint8_t red, uint8_t green, uint8_t blue, uint32_t duration = ULONG_MAX);
+        LEDAdder& set(uint8_t red,
+                      uint8_t green,
+                      uint8_t blue,
+                      uint32_t duration = ULONG_MAX,
+                      FunctionPointer0<void> callback = ((void (*)(void))NULL));
 
     private:
         /**
@@ -91,10 +96,16 @@ public:
      * @param blue The blue color intensity in [0;255]
      * @param duration The time in milliseconds the LED is on.
      *                 Setting this to ULONG_MAX means forever.
+     * @param callback Function to be called when command is replaced.
      * @return LEDAdder reference for a fluent API.
      */
-    LEDAdder set(uint8_t red, uint8_t green, uint8_t blue, uint32_t duration = ULONG_MAX);
+    LEDAdder set(uint8_t red,
+                 uint8_t green,
+                 uint8_t blue,
+                 uint32_t duration = ULONG_MAX,
+                 FunctionPointer0<void> callback = ((void (*)(void))NULL));
 
+private:
     /**
      * @brief Set RGB color value.
      * @details Commands are queued so vibration sequences can be grouped together.
@@ -104,11 +115,15 @@ public:
      * @param blue The blue color intensity in [0;255]
      * @param duration The time in milliseconds the LED is on.
      *                 Setting this to ULONG_MAX means forever.
+     * @param callback Function to be called when command is replaced.
      * @return LEDAdder reference for a fluent API.
      */
-    void addQueue(uint8_t red, uint8_t green, uint8_t blue, uint32_t duration = ULONG_MAX);
+    void addQueue(uint8_t red,
+                  uint8_t green,
+                  uint8_t blue,
+                  uint32_t duration,
+                  FunctionPointer0<void> callback);
 
-private:
     /* disable assignment and copy constructor */
     RGBLED(const RGBLED&);
     RGBLED& operator=(const RGBLED&);
@@ -121,13 +136,16 @@ private:
         uint8_t green;
         uint8_t blue;
         uint32_t duration;
+        FunctionPointer0<void> callback;
     } transaction_t;
 
     void processQueue(void);
     minar::callback_handle_t processQueueHandle;
     std::queue<transaction_t> sendQueue;
 
-#if YOTTA_CFG_HARDWARE_WEARABLE_REFERENCE_DESIGN_RGB_LED_PRESENT
+    FunctionPointer0<void> previousAction;
+
+#if YOTTA_CFG_HARDWARE_WRD_RGB_LED_PRESENT
     RGBLEDImplementation led;
 #else
     RGBLEDNotPresent led;

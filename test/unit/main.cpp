@@ -25,6 +25,8 @@ RGBLED rgb;
 
 void rotate()
 {
+    printf("rotate!\r\n");
+
     /** red
     */
     for (size_t up = 1; up < 255; up++)
@@ -61,13 +63,10 @@ void rotate()
         rgb.set(0, 0, down, DELAY);
     }
 
-    rgb.set(0, 0, 1);
+    rgb.set(0, 0, 1, DELAY, rotate);
 }
 
 void app_start(int, char *[])
 {
     rotate();
-
-    minar::Scheduler::postCallback(rotate)
-        .period(minar::milliseconds(3*(512)*DELAY));
 }
